@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Trackila Smart Assistant (Chatbot)</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; background:#f6f7fb; margin:0; }
+    header { background:#111827; color:#fff; padding:14px 20px; }
+    .wrap { max-width:900px; margin:20px auto; background:#fff; border-radius:14px; box-shadow:0 6px 16px rgba(0,0,0,.08); overflow:hidden; }
+    .info { padding:16px 20px; border-bottom:1px solid #eee; }
+    .chat { height:480px; padding:16px; overflow:auto; background:#fafafa; }
+    .inputbar { display:flex; gap:8px; padding:12px; border-top:1px solid #eee; }
+    .inputbar input { flex:1; padding:12px; border:1px solid #ddd; border-radius:10px; font-size:15px; }
+    .inputbar button { padding:12px 16px; border:0; background:#2563eb; color:#fff; border-radius:10px; cursor:pointer; }
+    .bubble { max-width:70%; margin:8px 0; padding:10px 12px; border-radius:12px; line-height:1.35; white-space:pre-wrap; }
+    .user { background:#dbeafe; margin-left:auto; }
+    .bot { background:#e5e7eb; }
+    .small { color:#6b7280; font-size:13px; }
+    a { color:#2563eb; text-decoration:none; }
+  </style>
+</head>
+<body>
+<header>
+  <h2>Trackila Smart Assistant (Chatbot)</h2>
+</header>
+
+<div class="wrap">
+  <div class="info">
+    <p class="small">A digital assistant for passengers to get quick answers. Handles queries like <b>bus timings</b>, <b>ticket fares</b>, <b>routes</b>, or <b>complaint registration</b>. Provides instant, automated responses.</p>
+  </div>
+  <div id="chat" class="chat"></div>
+  <div class="inputbar">
+    <input id="msg" placeholder="Type: 'schedule Mumbai to Pune', 'fare Delhi to Jaipur', or 'complaint'..." />
+    <button onclick="send()">Send</button>
+  </div>
+</div>
+
+<script>
+const chat = document.getElementById('chat');
+const msg = document.getElementById('msg');
+
+function addBubble(text, who='bot'){
+  const div = document.createElement('div');
+  div.className = 'bubble ' + (who==='user' ? 'user' : 'bot');
+  div.textContent = text;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function send(){
+  const text = msg.value.trim();
+  if(!text) return;
+  addBubble(text, 'user');
+  msg.value='';
+  fetch('/chat', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({message:text})})
+  .then(r=>r.json()).then(d=>addBubble(d.reply,'bot')).catch(()=>addBubble('Network error','bot'));
+}
+
+window.onload = () => {
+  addBubble("Hello! I'm Trackila Assistant 👋\nAsk me about timings, fares, routes, or type 'complaint' to register an issue.");
+}
+</script>
+</body>
+</html>
